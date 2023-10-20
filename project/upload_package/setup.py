@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name             = 'pygifconvt',
+    name             = 'gif_converter_nk',
     version          = '1.0.0',
     description      = 'Test package for distribution',
-    author           = 'Eunki7',
-    author_email     = 'outsider7224@gmail.com',
+    author           = 'nakyeong-kim',
+    author_email     = 'nana20170207@gmail.com',
     url              = '',
     download_url     = '',
     install_requires = ['pillow'],
