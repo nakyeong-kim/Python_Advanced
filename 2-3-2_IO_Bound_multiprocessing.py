@@ -76,7 +76,4 @@ if __name__ == "__main__":
 [SpawnPoolWorker-4 -> Read Contents : 68208, Status Code : 200] form https://realpython.com
 
 Downloaded 9 sites in 2.612433671951294 seconds
-
-
->> thread를 사용하였으므로 순서대로 방문 X. 적은 시간 소요됨을 확인할 수 있음.
 """
