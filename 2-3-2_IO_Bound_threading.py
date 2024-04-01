@@ -1,13 +1,14 @@
 """
-I/O Bound - Threading
+I/O Bound 2 - threading vs. asyncio vs. multiprocessing
 """
+
+# I/O Bound Threading 예제
+
 
 import concurrent.futures
 import threading
 import requests
 import time
-
-# Threading
 
 # 각 스레드에 생성되는 객체 - 독립된 네임스페이스 영역을 사용함
 thread_local = threading.local()
