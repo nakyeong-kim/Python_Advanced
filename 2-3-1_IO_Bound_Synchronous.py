@@ -1,11 +1,12 @@
 """
-I/O Bound - Synchronous
+I/O Bound 1 - Synchronous
 """
+
+# Synchronous Blocking I/O 예제
+
 
 import requests
 import time
-
-# Synchronous Blocking I/O
 
 # 실행함수1 : 다운로드
 def request_site(url, session):
