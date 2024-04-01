@@ -20,6 +20,8 @@ I/O Bound 2 - Asyncio basic
     붙이지 않으면 예외가 발생하거나, 동기 처리가 됨
         async def func2():
             await func1()
+    
+    ※ 최초의 시작점인 asyncio.run(or .run_until_complete)로 호출하는 함수 영역은 async를 붙이지 않아도 됨
 
 """
 
