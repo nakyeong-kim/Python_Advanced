@@ -1,122 +1,88 @@
 """
-I/O Bound 2 - Asyncio basic
-
-* 동시 프로그래밍 패러다임 변화
-    1. 싱글 코어 시절 → 처리 향상 미미, 저하
-    2. 비동기 프로그래밍 대두 → CPU 연산, DB 연동, API 호출 대기 시간이 늘어남
-    >> asyncio가 비동기 non-blocking임
-
-* 파이썬 3.4에서 비동기(asyncio) 표준라이브러리 등장
-    1. 동기(sync)
-        def func():
-            pass
-        
-    2. 비동기(async)
-    
-        async def func1():
-            pass
-
-    3. async 함수 안에서 다른 비동기 함수를 실행할 때에 await을 붙이는 규칙 기억
-    붙이지 않으면 예외가 발생하거나, 동기 처리가 됨
-        async def func2():
-            await func1()
-
+I/O Bound 2 - threading vs. asyncio vs. multiprocessing
 """
 
-# I/O Bound Asyncio 기초 예제
+# I/O Bound Asyncio 예제
+# threading 보다 높은 코드 복잡도 → async, await 적절하게 코딩 필요
 
 
-import time
 import asyncio
+# import requests     # 동기식이라 다른 패키지 사용 필요
+import aiohttp
+import time
 
-# 비동기 함수 1
-async def exe_calculate_async(name, n):
-    for i in range(1, n+1):
-        print(f'{name} -> {i} of {n} is calculating...')
-        # time.sleep(1)   # 동기 함수임. await을 붙여도 동기 함수므로 쓸 수가 없음.
-        await asyncio.sleep(1)      # 비동기 함수 사용하고 await 붙임.
-    print(f'{name} - {n} working done!')
 
-# 비동기 함수 2
-async def process_async():
-    start = time.time()
+# 실행함수1 : 다운로드
+async def request_site(session, url):
+    # 세션 확인
+    # print(session)
+    # print(session.headers)
+    # print(id(session.headers))
     
-    task1 = asyncio.create_task(
-        exe_calculate_async('One', 3)
-    )
-    task2 = asyncio.create_task(
-        exe_calculate_async('Two', 2)
-    )
-    task3 = asyncio.create_task(
-        exe_calculate_async('Three', 1)
-    )
+    async with session.get(url) as response:
+        print(f'Read Contents {response.content_length}, form {url}')
     
-    await task1
-    await task2
-    await task3
+        
+# 실행함수2 : 요청
+async def request_all_sites(urls):
+    async with aiohttp.ClientSession() as session:     # with문이랑 쓰므로 await 아님
+        # 작업 목록
+        tasks = []
+        for url in urls:
+            # 작업 목록 생성
+            task = asyncio.ensure_future(request_site(session, url))
+            tasks.append(task)
+        
+        # 태스크 확인
+        # print(*tasks)
+        # print(tasks)
 
-    end = time.time()
-    
-    print(f'>>> total seconds : {end - start}')
+        await asyncio.gather(*tasks, return_exceptions=True)
 
-# 동기 함수 1
-def exe_calculate_sync(name, n):
-    for i in range(1, n+1):
-        print(f'{name} -> {i} of {n} is calculating...')
-        time.sleep(1)
-    print(f'{name} - {n} working done!')
-
-# 동기 함수 2
-def process_sync():
-    start = time.time()
+def main():
+    # 테스트 URLS
+    urls = [
+        "https://www.jython.org", 
+        "http://olympus.realpython.org/dice", 
+        "https://realpython.com"
+    ] * 3   # 총 9개
     
-    exe_calculate_sync('One', 3)
-    exe_calculate_sync('Two', 2)
-    exe_calculate_sync('Three', 1)
-
-    end = time.time()
+    # 실행 시간 측정
+    start_time = time.time()
     
-    print(f'>>> total seconds : {end - start}')
-    
-if __name__ == '__main__':
-    # Sync 실행
-    # process_sync()
-    
-    # Async 실행
+    # 실행
     # 파이썬 3.7 이상
-    asyncio.run(process_async())
+    asyncio.run(request_all_sites(urls))
     # 파이썬 3.7 미만
-    # asyncio.get_event_loop().run_until_complete(process_async())
-
+    # asyncio.get_event_loop().run_until_complete(request_all_sites(urls))
+    
+    # 실행 시간 종료
+    duration = time.time() - start_time
+    
+    # 결과 출력
+    print(f'\nDownloaded {len(urls)} sites in {duration} seconds')
+    
+if __name__ == "__main__":
+    main()
+    
 
 
 """
 [실행 결과]
 
-# 동기
-One -> 1 of 3 is calculating...
-One -> 2 of 3 is calculating...
-One -> 3 of 3 is calculating...
-One - 3 working done!
-Two -> 1 of 2 is calculating...
-Two -> 2 of 2 is calculating...
-Two - 2 working done!
-Three -> 1 of 1 is calculating...
-Three - 1 working done!
->>> total seconds : 6.00937557220459
+Read Contents 3717, form https://www.jython.org
+Read Contents 274, form http://olympus.realpython.org/dice
+Read Contents 274, form http://olympus.realpython.org/dice
+Read Contents 274, form http://olympus.realpython.org/dice
+Read Contents 3717, form https://www.jython.org
+Read Contents 3717, form https://www.jython.org
+Read Contents None, form https://realpython.com
+Read Contents None, form https://realpython.com
+Read Contents None, form https://realpython.com
 
-# 비동기
-One -> 1 of 3 is calculating...
-Two -> 1 of 2 is calculating...
-Three -> 1 of 1 is calculating...
-One -> 2 of 3 is calculating...
-Two -> 2 of 2 is calculating...
-Three - 1 working done!
-One -> 3 of 3 is calculating...
-Two - 2 working done!
-One - 3 working done!
->>> total seconds : 3.0211994647979736
+Downloaded 9 sites in 0.8834607601165771 seconds
 
->> 비동기가 더 빠름. 순서 다름.
+>> threading, multiprocessing에 비해 asyncio가 훨씬 빠름
+>> 적합한 처리 방식을 선택해야 함
 
 """
